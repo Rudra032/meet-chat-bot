@@ -16,7 +16,9 @@
 
     <script>
       async function loadSlots() {
-        const res = await fetch("http://localhost:5000/available-slots");
+        const res = await fetch(
+          "https://meet-chat-bot.onrender.com/available-slots",
+        );
         const slots = await res.json();
 
         const container = document.getElementById("slots");
