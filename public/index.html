@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Schedule Meeting</title>
+  </head>
+  <body>
+    <h2>Book a Meeting</h2>
+
+    <input type="email" id="email" placeholder="Enter your email" />
+    <br /><br />
+
+    <h3>Select Available Time:</h3>
+    <div id="slots"></div>
+
+    <p id="result"></p>
+
+    <script>
+      async function loadSlots() {
+        const res = await fetch("http://localhost:5000/available-slots");
+        const slots = await res.json();
+
+        const container = document.getElementById("slots");
+        container.innerHTML = "";
+
+        if (slots.length === 0) {
+          container.innerHTML = "No available slots.";
+          return;
+        }
+
+        slots.forEach((slot) => {
+          const btn = document.createElement("button");
+          btn.innerText = new Date(slot).toLocaleString();
+          btn.style.margin = "5px";
+          btn.onclick = () => schedule(slot);
+          container.appendChild(btn);
+        });
+      }
+
+      async function schedule(selectedSlot) {
+        const email = document.getElementById("email").value;
+
+        if (!email) {
+          alert("Please enter your email first.");
+          return;
+        }
+
+        const response = await fetch("http://localhost:5000/schedule", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            dateTime: selectedSlot,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.meetLink) {
+          document.getElementById("result").innerHTML =
+            `<a href="${data.meetLink}" target="_blank">Join Meeting</a>`;
+        } else {
+          document.getElementById("result").innerText = "Something went wrong.";
+        }
+      }
+
+      loadSlots();
+    </script>
+  </body>
+</html>
